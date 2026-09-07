@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router'
 import { HelmetProvider } from 'react-helmet-async'
+import { Analytics } from '@vercel/analytics/react'
 import { QueryProvider } from './lib/QueryProvider'
 import { ClerkProvider } from './lib/ClerkProvider'
 import { AuthProvider } from './features/auth/hooks/useAuth'
@@ -64,6 +65,7 @@ export default function App() {
                   <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                   <Route path="/settings/:tab" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                 </Routes>
+                <Analytics />
               </FollowsProvider>
             </AuthProvider>
           </QueryProvider>

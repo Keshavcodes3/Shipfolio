@@ -36,6 +36,8 @@ export const createApp = () => {
       origin: (origin, callback) => {
         const allowed = [
           env.CORS_ORIGIN,
+          'https://shipfolio-five.vercel.app',
+          'https://shipfolio.onrender.com',
           'http://localhost:5173',
           'http://localhost:3000',
         ]
