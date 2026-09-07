@@ -1,0 +1,451 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProjectStatus {
+  BUILDING
+  SHIPPED
+  MAINTAINING
+  PAUSED
+  ARCHIVED
+}
+
+enum ProjectVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum ActivityType {
+  PROJECT_CREATED
+  COMMIT
+  PULL_REQUEST
+  RELEASE
+  ISSUE
+  STAR
+  FORK
+}
+
+enum SocialProvider {
+  GITHUB
+}
+
+enum NotificationType {
+  FOLLOWED_YOU
+  PROJECT_SHIPPED
+  PROJECT_INTERACTION
+  COMMUNITY_UPVOTE
+  COMMUNITY_COMMENT
+  NEED_INTEREST
+}
+
+enum ProjectNeedType {
+  FEEDBACK
+  BETA_TESTERS
+  EARLY_USERS
+  COLLABORATOR
+  DESIGNER
+  DEVELOPER
+  TECHNICAL_ADVICE
+  PRODUCT_ADVICE
+  OPEN_SOURCE_CONTRIBUTORS
+  OTHER
+}
+
+model User {
+  id         String  @id @default(cuid())
+  clerkId    String? @unique
+  username   String  @unique
+  email      String  @unique
+  password   String?
+  name       String?
+  avatarUrl  String?
+  bio        String?
+  location   String?
+  websiteUrl String?
+  linkedinUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects      Project[]
+  technologies  UserTechnology[]
+  githubAccount GithubAccount?
+  education     Education[]
+  experience    Experience[]
+
+  followers Follow[] @relation("followers")
+  following Follow[] @relation("following")
+
+  sessions Session[]
+
+  communityPosts    CommunityPost[]
+  communityComments CommunityComment[]
+  communityUpvotes  CommunityUpvote[]
+
+  needInterests NeedInterest[]
+
+  notifications      Notification[] @relation("notifications")
+  actorNotifications Notification[] @relation("actorNotifications")
+
+  @@index([username])
+}
+
+model Session {
+  id     String @id @default(cuid())
+  userId String
+
+  tokenHash String   @unique
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model GithubAccount {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  githubUserId String  @unique
+  username     String
+  avatarUrl    String?
+
+  accessToken    String?
+  refreshToken   String?
+  tokenExpiresAt DateTime?
+
+  connectedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repositories GithubRepository[]
+}
+
+model Project {
+  id     String @id @default(cuid())
+  userId String
+
+  name          String
+  slug          String
+  description   String?
+  coverImageUrl String?
+
+  status     ProjectStatus     @default(BUILDING)
+  visibility ProjectVisibility @default(PUBLIC)
+
+  githubRepoId String? @unique
+
+  liveUrl String?
+  demoUrl String?
+
+  startedAt     DateTime?
+  lastUpdatedAt DateTime?
+
+  isFeatured          Boolean @default(false)
+  isCurrentlyBuilding Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  githubRepo GithubRepository? @relation(fields: [githubRepoId], references: [id], onDelete: SetNull)
+
+  technologies ProjectTechnology[]
+  activities   ProjectActivity[]
+  projectNeeds ProjectNeed[]
+
+  @@unique([userId, slug])
+  @@index([userId])
+  @@index([userId, status])
+  @@index([userId, isFeatured])
+  @@index([userId, isCurrentlyBuilding])
+}
+
+model GithubRepository {
+  id              String @id @default(cuid())
+  githubAccountId String
+
+  githubRepoId String @unique
+  name         String
+  fullName     String
+
+  description String?
+
+  url     String
+  htmlUrl String
+
+  primaryLanguage String?
+
+  stars      Int @default(0)
+  forks      Int @default(0)
+  openIssues Int @default(0)
+
+  isPrivate  Boolean @default(false)
+  isArchived Boolean @default(false)
+  isFork     Boolean @default(false)
+
+  pushedAt     DateTime?
+  lastSyncedAt DateTime  @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  githubAccount GithubAccount @relation(fields: [githubAccountId], references: [id], onDelete: Cascade)
+
+  project    Project?
+  activities ProjectActivity[]
+
+  @@index([githubAccountId])
+  @@index([githubAccountId, isArchived])
+  @@index([lastSyncedAt])
+}
+
+model Technology {
+  id String @id @default(cuid())
+
+  name     String  @unique
+  slug     String  @unique
+  category String?
+
+  createdAt DateTime @default(now())
+
+  users    UserTechnology[]
+  projects ProjectTechnology[]
+}
+
+model UserTechnology {
+  userId       String
+  technologyId String
+
+  isPrimary Boolean @default(false)
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  technology Technology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+
+  @@id([userId, technologyId])
+  @@index([technologyId])
+}
+
+model ProjectTechnology {
+  projectId    String
+  technologyId String
+
+  isPrimary Boolean @default(false)
+
+  project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  technology Technology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, technologyId])
+  @@index([technologyId])
+}
+
+model ProjectNeed {
+  id        String         @id @default(cuid())
+  projectId String
+  type      ProjectNeedType
+  note      String?        @db.VarChar(280)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project   Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  interests NeedInterest[]
+
+  @@unique([projectId, type])
+  @@index([projectId])
+  @@index([type])
+}
+
+model NeedInterest {
+  id      String @id @default(cuid())
+  needId  String
+  userId  String
+  message String? @db.VarChar(280)
+
+  createdAt DateTime @default(now())
+
+  need ProjectNeed @relation(fields: [needId], references: [id], onDelete: Cascade)
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([needId, userId])
+  @@index([needId])
+  @@index([userId])
+}
+
+model ProjectActivity {
+  id String @id @default(cuid())
+
+  projectId    String
+  githubRepoId String?
+
+  type ActivityType
+
+  externalId  String?
+  title       String?
+  description String?
+
+  url String?
+
+  actorUsername  String?
+  actorAvatarUrl String?
+
+  occurredAt DateTime
+
+  createdAt DateTime @default(now())
+
+  project    Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  githubRepo GithubRepository? @relation(fields: [githubRepoId], references: [id], onDelete: SetNull)
+
+  @@unique([type, externalId])
+  @@index([projectId, occurredAt])
+  @@index([githubRepoId, occurredAt])
+  @@index([type, occurredAt])
+}
+
+model Follow {
+  followerId  String
+  followingId String
+
+  createdAt DateTime @default(now())
+
+  follower  User @relation("following", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followingId])
+  @@index([followerId])
+  @@index([followerId, createdAt])
+  @@index([followingId, createdAt])
+}
+
+model Education {
+  id          String   @id @default(cuid())
+  userId      String
+  institution String   @db.VarChar(200)
+  degree      String?  @db.VarChar(200)
+  fieldOfStudy String? @db.VarChar(200)
+  startYear   Int
+  endYear     Int?
+  description String?  @db.Text
+  sortOrder   Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, sortOrder])
+}
+
+model Experience {
+  id           String   @id @default(cuid())
+  userId       String
+  company      String   @db.VarChar(200)
+  role         String   @db.VarChar(200)
+  startDate    DateTime
+  endDate      DateTime?
+  description  String?  @db.Text
+  technologies String[]
+  sortOrder    Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, sortOrder])
+}
+
+enum CommunityPostType {
+  PROJECT_UPDATE
+  ASK_FOR_REVIEW
+  DISCUSSION
+  SHIP
+}
+
+model CommunityPost {
+  id          String          @id @default(cuid())
+  authorId    String
+  type        CommunityPostType @default(DISCUSSION)
+  title       String          @db.VarChar(200)
+  content     String          @db.Text
+  category    String          @db.VarChar(50)
+  isPinned    Boolean         @default(false)
+  upvoteCount Int             @default(0)
+  commentCount Int            @default(0)
+  tags        String[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  author   User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments CommunityComment[]
+  upvotes  CommunityUpvote[]
+
+  @@index([authorId])
+  @@index([type])
+  @@index([category])
+  @@index([createdAt])
+  @@index([upvoteCount])
+}
+
+model CommunityComment {
+  id        String   @id @default(cuid())
+  authorId  String
+  postId    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post   CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+model CommunityUpvote {
+  userId String
+  postId String
+
+  createdAt DateTime @default(now())
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+  @@index([postId])
+  @@index([userId])
+}
+
+model Notification {
+  id      String           @id @default(cuid())
+  userId  String
+  actorId String?
+  type    NotificationType
+  title   String           @db.VarChar(200)
+  message String           @db.VarChar(500)
+  link    String?          @db.VarChar(500)
+  projectId String?
+
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  user  User  @relation("notifications", fields: [userId], references: [id], onDelete: Cascade)
+  actor User? @relation("actorNotifications", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([userId, isRead])
+}

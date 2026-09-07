@@ -1,0 +1,6 @@
+export type NotificationType =
+  | "FOLLOWED_YOU"
+  | "PROJECT_SHIPPED"
+  | "PROJECT_INTERACTION"
+  | "COMMUNITY_UPVOTE"
+  | "COMMUNITY_COMMENT";

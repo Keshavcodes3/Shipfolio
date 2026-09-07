@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /settings
+Disallow: /dashboard
+Disallow: /projects/new
+
+Sitemap: https://shipfolio.com/sitemap.xml

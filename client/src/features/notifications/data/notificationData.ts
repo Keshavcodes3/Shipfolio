@@ -1,0 +1,51 @@
+import type { Notification } from '../types/notification'
+
+export const notifications: Notification[] = [
+  {
+    id: 'n-1',
+    type: 'FOLLOWED_YOU',
+    builder: { username: 'alex', displayName: 'Alex' },
+    text: 'alex followed you',
+    timestamp: '10m ago',
+    isRead: false,
+    href: '/@alex',
+  },
+  {
+    id: 'n-2',
+    type: 'PROJECT_SHIPPED',
+    builder: { username: 'sam', displayName: 'Sam' },
+    project: { id: 'relay', name: 'Relay' },
+    text: 'sam shipped Relay',
+    timestamp: '2h ago',
+    isRead: false,
+    href: '/projects/relay',
+  },
+  {
+    id: 'n-3',
+    type: 'PROJECT_INTERACTION',
+    project: { id: 'letterly', name: 'Letterly' },
+    text: 'Someone interacted with Letterly',
+    timestamp: 'yesterday',
+    isRead: true,
+    href: '/projects/letterly',
+  },
+  {
+    id: 'n-4',
+    type: 'FOLLOWED_YOU',
+    builder: { username: 'maya', displayName: 'Maya' },
+    text: 'maya followed you',
+    timestamp: '2 days ago',
+    isRead: true,
+    href: '/@maya',
+  },
+  {
+    id: 'n-5',
+    type: 'PROJECT_SHIPPED',
+    builder: { username: 'noah', displayName: 'Noah' },
+    project: { id: 'atlas', name: 'Atlas' },
+    text: 'noah shipped Atlas',
+    timestamp: '3 days ago',
+    isRead: true,
+    href: '/projects/atlas',
+  },
+]
