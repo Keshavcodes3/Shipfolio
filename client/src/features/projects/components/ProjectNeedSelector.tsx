@@ -10,15 +10,12 @@ import {
 import type { ProjectNeedType } from '../types/projectNeed'
 import { NEED_TYPE_LABELS, ALL_NEED_TYPES } from '../types/projectNeed'
 
-const ease = [0.22, 1, 0.36, 1] as const
-
 interface ProjectNeedSelectorProps {
   projectId: string
   isOwner: boolean
-  mode?: 'display' | 'edit'
 }
 
-export default function ProjectNeedSelector({ projectId, isOwner, mode = 'display' }: ProjectNeedSelectorProps) {
+export default function ProjectNeedSelector({ projectId, isOwner }: ProjectNeedSelectorProps) {
   const { data: needs = [], isLoading } = useProjectNeeds(projectId)
   const createNeed = useCreateProjectNeed()
   const updateNeed = useUpdateProjectNeed()

@@ -101,7 +101,7 @@ const processor = async (job: Job) => {
 
       const { data: rawRepo } = await githubClient.getRepo(repo.fullName, account.accessToken);
       await githubRepository.upsertRepository(repo.githubRepoId, {
-        githubAccountId: account.id,
+        githubAccount: { connect: { id: account.id } },
         githubRepoId: repo.githubRepoId,
         name: rawRepo.name,
         fullName: rawRepo.full_name,

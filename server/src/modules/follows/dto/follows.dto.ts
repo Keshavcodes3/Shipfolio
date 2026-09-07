@@ -3,11 +3,11 @@
 export const toFollowResult = (data: {
   following: boolean;
   followers: number;
-  following: number;
+  followingCount: number;
 }): FollowResult => ({
   following: data.following,
-  followerCount: data.followers,
-  followingCount: data.following,
+  followers: data.followers,
+  followingCount: data.followingCount,
 });
 
 export const toFollowUserSummary = (user: {

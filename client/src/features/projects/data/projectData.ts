@@ -1,4 +1,4 @@
-import type { Project, ProjectDetail } from '../../lib/hooks'
+import type { Project, ProjectDetail } from '../../../lib/hooks'
 
 export type ProjectStatus = 'BUILDING' | 'SHIPPED' | 'MAINTAINING' | 'PAUSED' | 'ARCHIVED'
 
@@ -132,10 +132,7 @@ export function toProjectDetailDisplay(
   project: ProjectDetail,
   ownerProfile?: { username: string; displayName: string; bio?: string; avatar?: string }
 ): ProjectDetailDisplay {
-  const year = project.startedAt
-    ? new Date(project.startedAt).getFullYear()
-    : new Date(project.createdAt).getFullYear()
-  const hash = project.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
+  const hash = project.id.split('').reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0)
   const visual = visualCycle[hash % visualCycle.length]
 
   const timeAgo = (date: Date) => {

@@ -1,7 +1,5 @@
-import { motion, useInView } from 'framer-motion'
+import { useInView } from 'framer-motion'
 import { useRef, useEffect, useState } from 'react'
-
-const ease = [0.22, 1, 0.36, 1] as const
 
 interface ProfileStatsProps {
   stats: {

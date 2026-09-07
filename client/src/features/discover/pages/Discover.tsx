@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router'
-import { Search, Star, ArrowRight, Code2, Sparkles, HelpCircle } from 'lucide-react'
+import { Search, Star, ArrowRight, Code2, Sparkles } from 'lucide-react'
 import SidebarShell from '../../Dashboard/Components/SidebarShell'
 import { useDiscoverProjects, useFeaturedProjects, useFeaturedBuilders } from '../../../lib/hooks'
 import type { Project } from '../../../lib/hooks'

@@ -181,7 +181,6 @@ function Hero() {
       {/* Grid pattern */}
 
       <SEO
-        title={null}
         description="Ship, showcase, and track what you build. ShipFolio is a living portfolio for indie hackers, developers, and creators who ship real projects."
         url="/"
       />

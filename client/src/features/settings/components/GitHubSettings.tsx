@@ -179,7 +179,7 @@ export default function GitHubSettings() {
                 </div>
               ) : repos && Array.isArray(repos) && repos.length > 0 ? (
                 <div className="space-y-2">
-                  {repos.map((repo: { id: string; name: string; fullName: string; private: boolean }, i: number) => (
+                  {repos.map((repo, i: number) => (
                     <motion.div
                       key={repo.id}
                       initial={{ opacity: 0, x: -8 }}
@@ -191,7 +191,7 @@ export default function GitHubSettings() {
                         <p className="text-[14px] text-[#F5F7F2] font-mono">{repo.name}</p>
                         <p className="text-[11px] text-[#555B55]">{repo.fullName}</p>
                       </div>
-                      {repo.private && (
+                      {repo.isPrivate && (
                         <span className="text-[10px] text-[#303530] font-mono">Private</span>
                       )}
                     </motion.div>

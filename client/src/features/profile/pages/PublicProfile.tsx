@@ -73,9 +73,9 @@ function ProfileContent({ profile }: { profile: PublicProfileType }) {
   return (
     <SidebarShell>
       <SEO
-        title={`${profile?.displayName || 'Builder'} (@${profile?.username || ''})`}
-        description={profile?.bio || `Check out ${profile?.displayName}'s projects on ShipFolio.`}
-        url={`/profile/${username}`}
+        title={`${profile?.name || profile?.username || 'Builder'} (@${profile?.username || ''})`}
+        description={profile?.bio || `Check out ${profile?.name || profile?.username}'s projects on ShipFolio.`}
+        url={`/profile/${profile?.username || ''}`}
         type="profile"
       />
       <div className="text-[#F5F7F2] relative overflow-hidden min-h-screen">

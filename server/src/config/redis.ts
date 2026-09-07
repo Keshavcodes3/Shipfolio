@@ -1,5 +1,7 @@
-import Redis from "ioredis";
+import RedisModule from "ioredis";
 import { env } from "./env.js";
+
+const Redis = (RedisModule as any).default ?? RedisModule;
 
 let redisFailed = false;
 
@@ -7,7 +9,7 @@ export const redis = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
   lazyConnect: true,
-  retryStrategy(times) {
+  retryStrategy(times: number) {
     if (times > 3) {
       redisFailed = true;
       return null; // stop retrying
@@ -20,7 +22,7 @@ export const redis = new Redis(env.REDIS_URL, {
 redis.on("connect", () => {
   if (!redisFailed) console.log("✅ Redis connected");
 });
-redis.on("error", (err) => {
+redis.on("error", (err: Error) => {
   if (!redisFailed) {
     console.error("❌ Redis error", err.message);
     redisFailed = true;

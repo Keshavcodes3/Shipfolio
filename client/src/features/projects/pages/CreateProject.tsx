@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { ArrowLeft, Star, GitFork, Search, X, Plus, Link2 } from 'lucide-react'
+import { ArrowLeft, Star, GitFork, Search, X } from 'lucide-react'
 import LoadingSpinner from '../../../components/LoadingSpinner'
 import { FaGithub } from 'react-icons/fa'
 import { Link, useNavigate } from 'react-router'
@@ -218,7 +218,6 @@ const langColor: Record<string, string> = {
 }
 
 export default function CreateProject() {
-  const navigate = useNavigate()
   const createProject = useCreateProject()
   const createNeed = useCreateProjectNeed()
   const connectRepo = useConnectGitHubRepo()

@@ -10,7 +10,7 @@ interface FollowBuilderButtonProps {
   size?: 'sm' | 'md'
 }
 
-export default function FollowBuilderButton({ username, displayName, size = 'md' }: FollowBuilderButtonProps) {
+export default function FollowBuilderButton({ username, displayName: _displayName, size = 'md' }: FollowBuilderButtonProps) {
   const { data: followData } = useFollowStatus(username)
   const toggleFollow = useToggleFollow(username)
   const isFollowed = followData?.following ?? false

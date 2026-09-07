@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { ArrowLeft, Star, GitFork, Search, X, Plus } from 'lucide-react'
+import { ArrowLeft, Star, GitFork, Search, X } from 'lucide-react'
 import LoadingSpinner from '../../../components/LoadingSpinner'
 import { FaGithub } from 'react-icons/fa'
 import { Link, useNavigate, useParams } from 'react-router'
@@ -168,7 +168,6 @@ const langColor: Record<string, string> = {
 
 export default function EditProject() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
 
   const { data: project, isLoading: projectLoading } = useProject(id || '')
   const updateProject = useUpdateProject()
@@ -485,7 +484,7 @@ export default function EditProject() {
                   <p className="text-[12px] text-[#303530] mb-3">
                     What are you looking for help with? Others can offer to help.
                   </p>
-                  <ProjectNeedSelector projectId={id} isOwner={true} mode="edit" />
+                  <ProjectNeedSelector projectId={id} isOwner={true} />
                 </motion.div>
               )}
 

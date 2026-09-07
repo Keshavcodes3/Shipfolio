@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router'
 import {
-  X, Search, Skull, BookOpen, TrendingDown, AlertTriangle,
+  X, Search, Skull, BookOpen, TrendingDown,
   Users, DollarSign, Lightbulb, Target,
   Zap, ChevronRight, Eye, Layers
 } from 'lucide-react'

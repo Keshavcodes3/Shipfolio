@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router'
 import {
   MessageCircle, ChevronUp, Send, Pin, X, Plus, Hash, Users,
-  Sparkles, HelpCircle, Rocket, Repeat, TrendingUp, Clock,
+  Sparkles, HelpCircle, Rocket, Repeat, TrendingUp,
   ArrowRight, Zap, BookOpen, Search, Trash2
 } from 'lucide-react'
 import SidebarShell from '../../Dashboard/Components/SidebarShell'

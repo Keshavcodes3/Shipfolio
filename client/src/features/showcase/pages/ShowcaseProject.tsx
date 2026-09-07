@@ -78,7 +78,7 @@ export default function ShowcaseProject() {
   const fullName = githubRepo?.fullName
 
   const { data: readmeData, isLoading: readmeLoading } = useGithubReadme(fullName)
-  const { data: contributors, isLoading: contributorsLoading } = useGithubContributors(fullName)
+  const { data: contributors } = useGithubContributors(fullName)
   const { data: languages } = useGithubLanguages(fullName)
 
   if (projectLoading) return <LoadingScreen />
@@ -216,7 +216,7 @@ export default function ShowcaseProject() {
               )}
               <div>
                 <p className="text-[13px] text-[#F5F7F2] group-hover:text-[#B6F34A] transition-colors font-medium">
-                  {project.user?.name ?? project.user?.username ?? 'unknown'}
+                  {project.user?.displayName ?? project.user?.username ?? 'unknown'}
                 </p>
                 <p className="text-[10px] text-[#555B55] font-mono">BUILDER</p>
               </div>
@@ -497,7 +497,7 @@ export default function ShowcaseProject() {
                         </div>
                       )}
                       <div>
-                        <p className="text-[13px] text-[#F5F7F2] font-medium">{project.user?.name ?? project.user?.username ?? 'unknown'}</p>
+                        <p className="text-[13px] text-[#F5F7F2] font-medium">{project.user?.displayName ?? project.user?.username ?? 'unknown'}</p>
                         <p className="text-[10px] text-[#555B55] font-mono">BUILDER</p>
                       </div>
                     </div>

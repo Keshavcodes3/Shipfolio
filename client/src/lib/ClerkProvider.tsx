@@ -14,7 +14,7 @@ export function ClerkProvider({ children }: { children: ReactNode }) {
       afterSignOutUrl="/"
       signInUrl="/login"
       signUpUrl="/register"
-      fallbackRedirectUrl="/dashboard"
+      signInFallbackRedirectUrl="/dashboard"
       appearance={{
         variables: {
           colorPrimary: '#B6F34A',

@@ -135,7 +135,7 @@ export const projectNeedsService = {
       note: input.note,
     });
 
-    return toNeedResponse({ ...updated, _count: { interests: existing.interestCount } });
+    return toNeedResponse({ ...updated, _count: { interests: existing.interests?.length ?? 0 } });
   },
 
   // -------------------------------------------------------------------------

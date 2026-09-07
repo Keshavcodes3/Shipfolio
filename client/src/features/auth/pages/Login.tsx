@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 import { motion } from 'framer-motion'
 import { useSignIn } from '@clerk/clerk-react'
-import { ArrowRight } from 'lucide-react'
+
 import Logo from '../../../components/Logo'
 import SEO from '../../../components/SEO'
 

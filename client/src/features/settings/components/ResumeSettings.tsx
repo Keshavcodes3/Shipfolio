@@ -75,7 +75,7 @@ export default function ResumeSettings() {
 
   const updateProfile = useUpdateProfile()
 
-  const [linkedin, setLinkedin] = useState(user?.linkedinUrl ?? '')
+  const [linkedin, setLinkedin] = useState((user as any)?.linkedinUrl ?? '')
   const [educations, setEducations] = useState<EducationForm[]>([])
   const [experiences, setExperiences] = useState<ExperienceForm[]>([])
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)

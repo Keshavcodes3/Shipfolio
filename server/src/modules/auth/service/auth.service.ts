@@ -158,8 +158,8 @@ export const authService = {
       if (user) {
         // Link existing account to Clerk
         user = await authRepository.update(user.id, {
-          name: input.name ?? user.name,
-          avatarUrl: input.avatarUrl ?? user.avatarUrl,
+          name: input.name ?? user.name ?? undefined,
+          avatarUrl: input.avatarUrl ?? user.avatarUrl ?? undefined,
         });
         // We need to update clerkId - use prisma directly since update doesn't support it yet
         const { prisma } = await import("../../../config/database.js");
@@ -188,8 +188,8 @@ export const authService = {
     } else {
       // Update existing Clerk user's info
       user = await authRepository.update(user.id, {
-        name: input.name ?? user.name,
-        avatarUrl: input.avatarUrl ?? user.avatarUrl,
+        name: input.name ?? user.name ?? undefined,
+        avatarUrl: input.avatarUrl ?? user.avatarUrl ?? undefined,
       });
     }
 

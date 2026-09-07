@@ -9,9 +9,9 @@ const log = createLogger("workers");
 // Lazy-loaded workers — only instantiated when Redis is available
 // ---------------------------------------------------------------------------
 
-let _githubWorker: Awaited<ReturnType<typeof import("./github.worker.js").default>> | null = null;
-let _activityWorker: Awaited<ReturnType<typeof import("./activity.worker.js").default>> | null = null;
-let _repoMetadataWorker: Awaited<ReturnType<typeof import("./repo-metadata.worker.js").default>> | null = null;
+let _githubWorker: any = null;
+let _activityWorker: any = null;
+let _repoMetadataWorker: any = null;
 
 export const startWorkers = async () => {
   if (redis.status !== "ready" && redis.status !== "connecting") {
