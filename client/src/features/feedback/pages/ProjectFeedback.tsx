@@ -8,7 +8,7 @@ import FeedbackSummary from '../components/FeedbackSummary'
 import FeedbackList from '../components/FeedbackList'
 import FeedbackComposer from '../components/FeedbackComposer'
 import { feedbackRequests, feedbackResponses, type FeedbackCategory } from '../data/feedbackData'
-import { projects } from '../../projects/data/projectDetailData'
+import { useProject } from '../../../lib/hooks'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
@@ -17,7 +17,7 @@ export default function ProjectFeedback() {
   const [helpfulMap, setHelpfulMap] = useState<Record<string, boolean>>({})
   const [localResponses, setLocalResponses] = useState(feedbackResponses)
 
-  const project = id ? projects[id] : undefined
+  const { data: project, isLoading } = useProject(id || '')
   const request = feedbackRequests.find((r) => r.projectId === id)
 
   const responses = useMemo(
@@ -29,6 +29,16 @@ export default function ProjectFeedback() {
     () => Object.values(helpfulMap).filter(Boolean).length + responses.reduce((sum, r) => sum + r.helpfulCount, 0),
     [helpfulMap, responses]
   )
+
+  if (isLoading) {
+    return (
+      <SidebarShell>
+        <div className="flex items-center justify-center px-5 py-32">
+          <div className="w-3 h-3 rounded-full bg-[#B6F34A] animate-pulse" />
+        </div>
+      </SidebarShell>
+    )
+  }
 
   if (!project || !request) {
     return (

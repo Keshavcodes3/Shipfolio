@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useSearchParams } from 'react-router'
 import { search } from '../services/searchService'
 import { useDebounce } from './useDebounce'
@@ -18,6 +18,10 @@ export function useSearch() {
     (searchParams.get('type') as SearchFilterType) ?? 'all'
   )
 
+  const [results, setResults] = useState<SearchResults>(DEFAULT_RESULTS)
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
   const debouncedQuery = useDebounce(query, 300)
 
   const setQuery = useCallback((value: string) => {
@@ -35,21 +39,35 @@ export function useSearch() {
     setSearchParams(params, { replace: true })
   }, [debouncedQuery, activeFilter, setSearchParams])
 
-  const searchResult = useMemo(() => {
-    if (!debouncedQuery.trim()) return { results: DEFAULT_RESULTS, error: null }
-
-    try {
-      const searchType = activeFilter === 'all' ? undefined : activeFilter
-      const r = search({ query: debouncedQuery, type: searchType })
-      return { results: r, error: null }
-    } catch {
-      return { results: DEFAULT_RESULTS, error: 'Something went wrong while searching. Please try again.' }
+  useEffect(() => {
+    if (!debouncedQuery.trim()) {
+      setResults(DEFAULT_RESULTS)
+      setError(null)
+      setIsLoading(false)
+      return
     }
-  }, [debouncedQuery, activeFilter])
 
-  const results = searchResult.results
-  const error = searchResult.error
-  const isLoading = query.trim() !== debouncedQuery
+    let cancelled = false
+    setIsLoading(true)
+
+    search({ query: debouncedQuery, type: activeFilter === 'all' ? undefined : activeFilter })
+      .then((r) => {
+        if (!cancelled) {
+          setResults(r)
+          setError(null)
+          setIsLoading(false)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setResults(DEFAULT_RESULTS)
+          setError('Something went wrong while searching. Please try again.')
+          setIsLoading(false)
+        }
+      })
+
+    return () => { cancelled = true }
+  }, [debouncedQuery, activeFilter])
 
   const totalResults = results.totals.projects + results.totals.builders + results.totals.technologies
 

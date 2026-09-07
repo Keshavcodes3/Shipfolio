@@ -294,6 +294,11 @@ export const projectsService = {
       // User explicitly disabling — will be handled in the update data
     }
 
+    // Prevent re-publishing: once SHIPPED, cannot set back to SHIPPED
+    if (input.status === "SHIPPED" && existing.status === "SHIPPED") {
+      throw new BadRequestError("Project is already published");
+    }
+
     // Build update data — never overwrite creator-owned fields from GitHub
     const data: Record<string, unknown> = {};
     if (input.name !== undefined) data.name = input.name;

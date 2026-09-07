@@ -389,7 +389,9 @@ export default function EditProject() {
                 transition={{ delay: 0.35, duration: 0.5, ease }} className="mb-7">
                 <label className="block text-[10px] uppercase tracking-[0.2em] text-[#555B55] font-mono mb-3">Status</label>
                 <div className="grid grid-cols-2 gap-2">
-                  {projectStatuses.map((s) => (
+                  {projectStatuses
+                    .filter((s) => !(s.value === 'SHIPPED' && project?.status === 'SHIPPED'))
+                    .map((s) => (
                     <button key={s.value} onClick={() => setStatus(s.value)}
                       className={`px-4 py-3 text-[13px] font-medium border-2 transition-all duration-300 ${
                         status === s.value

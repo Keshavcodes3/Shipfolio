@@ -1,136 +1,14 @@
+import { api } from '../../../lib/api'
 import type {
   SearchResults,
-  SearchProject,
-  SearchBuilder,
-  SearchTechnology,
   SearchEntityType,
 } from '../types/search'
-import { allProjects, allBuilders, technologies } from '../../discover/data/discoverData'
 
-const WEIGHTS = {
-  exactMatch: 100,
-  prefixMatch: 80,
-  startsWithWord: 60,
-  containsName: 40,
-  technologyMatch: 30,
-  descriptionMatch: 10,
-} as const
-
-function normalize(text: string): string {
-  return text.toLowerCase().trim()
-}
-
-function scoreText(query: string, target: string): number {
-  const q = normalize(query)
-  const t = normalize(target)
-
-  if (q === t) return WEIGHTS.exactMatch
-  if (t.startsWith(q)) return WEIGHTS.prefixMatch
-  if (t.split(/\s+/).some((word) => word.startsWith(q))) return WEIGHTS.startsWithWord
-  if (t.includes(q)) return WEIGHTS.containsName
-  return 0
-}
-
-function scoreProject(query: string, project: SearchProject): number {
-  let score = 0
-  score = Math.max(score, scoreText(query, project.name))
-  score = Math.max(score, scoreText(query, project.builder.username))
-  score = Math.max(score, scoreText(query, project.builder.displayName))
-
-  if (project.technologies.some((t) => normalize(t).includes(normalize(query)))) {
-    score = Math.max(score, WEIGHTS.technologyMatch)
-  }
-
-  if (normalize(project.description).includes(normalize(query))) {
-    score = Math.max(score, WEIGHTS.descriptionMatch)
-  }
-
-  if (normalize(project.category).includes(normalize(query))) {
-    score = Math.max(score, WEIGHTS.descriptionMatch)
-  }
-
-  return score
-}
-
-function scoreBuilder(query: string, builder: SearchBuilder): number {
-  let score = 0
-  score = Math.max(score, scoreText(query, builder.username))
-  score = Math.max(score, scoreText(query, builder.displayName))
-  score = Math.max(score, scoreText(query, builder.headline))
-
-  if (builder.technologies.some((t) => normalize(t).includes(normalize(query)))) {
-    score = Math.max(score, WEIGHTS.technologyMatch)
-  }
-
-  if (normalize(builder.bio).includes(normalize(query))) {
-    score = Math.max(score, WEIGHTS.descriptionMatch)
-  }
-
-  if (normalize(builder.specialty).includes(normalize(query))) {
-    score = Math.max(score, WEIGHTS.descriptionMatch)
-  }
-
-  return score
-}
-
-function scoreTechnology(query: string, tech: SearchTechnology): number {
-  return scoreText(query, tech.name)
-}
-
-function searchProjects(query: string): SearchProject[] {
-  if (!query.trim()) return []
-
-  const scored = allProjects
-    .map((p) => ({ project: p, score: scoreProject(query, p) }))
-    .filter((item) => item.score > 0)
-    .sort((a, b) => b.score - a.score || b.project.stars - a.project.stars)
-
-  return scored.map(({ project }) => ({
-    id: project.id,
-    name: project.name,
-    description: project.description,
-    builder: project.builder,
-    status: project.status,
-    technologies: project.technologies,
-    category: project.category,
-    stars: project.stars,
-    updatedAt: project.updatedAt,
-  }))
-}
-
-function searchBuilders(query: string): SearchBuilder[] {
-  if (!query.trim()) return []
-
-  const scored = allBuilders
-    .map((b) => ({ builder: b, score: scoreBuilder(query, b) }))
-    .filter((item) => item.score > 0)
-    .sort((a, b) => b.score - a.score || b.builder.followers - a.builder.followers)
-
-  return scored.map(({ builder }) => ({
-    username: builder.username,
-    displayName: builder.displayName,
-    avatar: builder.avatar,
-    headline: builder.headline,
-    bio: builder.bio,
-    technologies: builder.technologies,
-    specialty: builder.specialty,
-    followers: builder.followers,
-    projectCount: builder.projectCount,
-  }))
-}
-
-function searchTechnologies(query: string): SearchTechnology[] {
-  if (!query.trim()) return []
-
-  const scored = technologies
-    .map((t) => ({ technology: t, score: scoreTechnology(query, t) }))
-    .filter((item) => item.score > 0)
-    .sort((a, b) => b.score - a.score || b.technology.projectCount - a.technology.projectCount)
-
-  return scored.map(({ technology }) => ({
-    name: technology.name,
-    projectCount: technology.projectCount,
-  }))
+const DEFAULT_RESULTS: SearchResults = {
+  projects: [],
+  builders: [],
+  technologies: [],
+  totals: { projects: 0, builders: 0, technologies: 0 },
 }
 
 export interface SearchOptions {
@@ -139,21 +17,80 @@ export interface SearchOptions {
   limit?: number
 }
 
-export function search({ query, type, limit = 20 }: SearchOptions): SearchResults {
+export async function search({ query, type, limit = 20 }: SearchOptions): Promise<SearchResults> {
   const q = query.trim()
+  if (!q) return DEFAULT_RESULTS
 
-  const projects = type === 'builders' || type === 'technologies' ? [] : searchProjects(q)
-  const builders = type === 'projects' || type === 'technologies' ? [] : searchBuilders(q)
-  const techs = type === 'projects' || type === 'builders' ? [] : searchTechnologies(q)
+  const shouldSearch = (t: SearchEntityType) => !type || type === t
+
+  const promises: Promise<any>[] = []
+
+  if (shouldSearch('projects')) {
+    promises.push(
+      api.get('/projects', { params: { search: q, limit } })
+        .then((r) => (r.data.data ?? r.data).map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description ?? '',
+          builder: {
+            username: p.owner?.username ?? p.user?.username ?? '',
+            displayName: p.owner?.displayName ?? p.owner?.name ?? p.user?.name ?? '',
+          },
+          status: p.status ?? 'BUILDING',
+          technologies: (p.technologies ?? []).map((t: any) => t.name ?? t),
+          category: '',
+          stars: p.stars ?? 0,
+          updatedAt: p.updatedAt ?? '',
+        })))
+        .catch(() => [])
+    )
+  } else {
+    promises.push(Promise.resolve([]))
+  }
+
+  if (shouldSearch('builders')) {
+    promises.push(
+      api.get('/users', { params: { search: q, limit } })
+        .then((r) => (r.data.data ?? r.data).map((u: any) => ({
+          username: u.username,
+          displayName: u.name ?? u.displayName ?? u.username,
+          avatar: u.avatarUrl ?? u.avatar ?? '',
+          headline: u.bio ?? '',
+          bio: u.bio ?? '',
+          technologies: (u.technologies ?? []).map((t: any) => t.name ?? t),
+          specialty: 'Full Stack',
+          followers: u._count?.followers ?? u.followerCount ?? 0,
+          projectCount: u._count?.projects ?? u.projectCount ?? 0,
+        })))
+        .catch(() => [])
+    )
+  } else {
+    promises.push(Promise.resolve([]))
+  }
+
+  if (shouldSearch('technologies')) {
+    promises.push(
+      api.get('/technologies/search', { params: { q, limit } })
+        .then((r) => (r.data.data ?? r.data).map((t: any) => ({
+          name: t.name,
+          projectCount: t._count?.projects ?? t.projectCount ?? 0,
+        })))
+        .catch(() => [])
+    )
+  } else {
+    promises.push(Promise.resolve([]))
+  }
+
+  const [projects, builders, technologies] = await Promise.all(promises)
 
   return {
-    projects: projects.slice(0, limit),
-    builders: builders.slice(0, limit),
-    technologies: techs.slice(0, limit),
+    projects,
+    builders,
+    technologies,
     totals: {
       projects: projects.length,
       builders: builders.length,
-      technologies: techs.length,
+      technologies: technologies.length,
     },
   }
 }
